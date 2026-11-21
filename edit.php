@@ -3,7 +3,8 @@ declare(strict_types=1);
 if (!defined('CONTACTS_APP')) { http_response_code(403); exit('Доступ только через index.php'); }
 $rows = db()->query('SELECT id,surname,first_name,patronymic FROM contacts ORDER BY ' . nameOrder())->fetchAll();
 if (!$rows) { echo '<h2>Редактирование записи</h2><p class="empty">Нет записей для редактирования. Сначала добавьте контакт.</p>'; return; }
-$selectedId = positiveInt($_GET, 'id');
+$requestedId = filter_var(param($_GET, 'id'), FILTER_VALIDATE_INT, ['options'=>['min_range'=>1]]);
+$selectedId = $requestedId === false ? 0 : $requestedId;
 $ids = array_column($rows, 'id');
 if (!in_array($selectedId, array_map('intval', $ids), true) || (param($_GET, 'id') === '' && $_SERVER['REQUEST_METHOD'] === 'POST')) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') { echo '<p class="notice error">Запись не найдена. Изменения не сохранены.</p>'; return; }
