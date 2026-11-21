@@ -1,0 +1,5 @@
+Options -Indexes
+DirectoryIndex index.php
+<FilesMatch "^(menu|viewer|add|edit|delete|helpers|config|config\.local|config\.local\.example)\.php$">
+Require all denied
+</FilesMatch>
