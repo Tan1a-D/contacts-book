@@ -17,10 +17,12 @@ function db(): PDO {
         $connection = new PDO('mysql:host=' . $config['host'] . ';dbname=' . $config['database'] . ';charset=utf8mb4', $config['username'], $config['password']);
     } else {
         if (!is_dir(__DIR__ . '/data') && !mkdir(__DIR__ . '/data', 0700, true)) throw new RuntimeException('Storage unavailable');
-        $connection = new PDO('sqlite:' . $config['path']);
+        $dsn = 'sqlite:' . $config['path'];
+        $connection = class_exists('Pdo\\Sqlite') ? new \Pdo\Sqlite($dsn) : new PDO($dsn);
         if (class_exists('Collator')) {
             $collator = new Collator('ru_RU');
-            $connection->sqliteCreateCollation('RUSSIAN', fn($a, $b) => $collator->compare($a, $b));
+            if (method_exists($connection, 'createCollation')) $connection->createCollation('RUSSIAN', fn($a, $b) => $collator->compare($a, $b));
+            else $connection->sqliteCreateCollation('RUSSIAN', fn($a, $b) => $collator->compare($a, $b));
         }
     }
     $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
